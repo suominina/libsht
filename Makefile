@@ -1,5 +1,5 @@
 CC = gcc
 CFLAGS = -g -Wall -Wextra -pedantic -std=c11
 
-main: main.c
+test: test.c
 	$(CC) $(CFLAGS) -o $@ $^

@@ -28,5 +28,8 @@ int main(void)
         printf("%s\n", result);
     }
 
+    lht_remove(ht, key);
+    lht_free_all(ht);
+
     exit(EXIT_SUCCESS);
 }

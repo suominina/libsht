@@ -18,14 +18,12 @@ typedef struct lht_t {
 lht_t *lht_create();
 int lht_set(lht_t *ht, const char *key, const char *value);
 char *lht_get(lht_t* ht, const char *key);
-/* TODO: implement these */
-int lht_remove(lht_t* ht, const char *key);
-int lht_free(lht_t* ht);
+void lht_remove(lht_t* ht, const char *key);
+void lht_free_all(lht_t* ht);
 
-
-/* functions below are being used internaly */
-unsigned int ht_hash(const char *key);
-entry_t *ht_pair(const char *key, const char *value);
+static unsigned int ht_hash(const char *key);
+static entry_t *ht_pair(const char *key, const char *value);
+static entry_t *ht_free_entry(entry_t *entry);
 
 unsigned int ht_hash(const char *key)
 {
@@ -43,7 +41,7 @@ unsigned int ht_hash(const char *key)
 
 entry_t *ht_pair(const char *key, const char *value)
 {
-    entry_t *entry = malloc(sizeof(entry));
+    entry_t *entry = malloc(sizeof(entry_t));
     if (entry == NULL) return entry;
 
     entry->key = malloc(strlen(key) + 1);
@@ -51,6 +49,9 @@ entry_t *ht_pair(const char *key, const char *value)
 
     strncpy(entry->key, key, strlen(key));
     strncpy(entry->value, value, strlen(value));
+
+    entry->key[strlen(key)] = '\0';
+    entry->value[strlen(value)] = '\0';
 
     entry->next = NULL;
 
@@ -138,4 +139,56 @@ char *lht_get(lht_t *ht, const char *key)
 
     /* there were entries but no key match */
     return NULL;
+}
+
+void lht_remove(lht_t* ht, const char *key)
+{
+    unsigned int slot = ht_hash(key);
+    entry_t *entry = ht->entries[slot];
+    entry_t *prev = NULL;
+
+    while (entry != NULL) {
+        if (strncmp(entry->key, key, strlen(key)+1) == 0) {
+            if (prev == NULL) {
+                ht->entries[slot] = entry->next;
+            } else {
+                prev->next = entry->next;
+            }
+
+            entry = ht_free_entry(entry);
+        } else { 
+            prev = entry;
+            entry = entry->next;
+        }
+    }
+}
+
+entry_t *ht_free_entry(entry_t *entry)
+{
+    entry_t *next = entry->next;
+    free(entry->key);
+    free(entry->value);
+    free(entry);
+
+    return next;
+}
+
+void lht_free_all(lht_t* ht)
+{
+    if (ht == NULL) return;
+
+    entry_t *entry;
+
+    for (int i = 0; i < TABLE_SIZE; i++) {
+        entry = ht->entries[i];
+
+        while (entry != NULL) {
+            entry = ht_free_entry(entry);
+        }
+    }
+
+    free(ht->entries);
+    free(ht);
+
+    return;
 }
