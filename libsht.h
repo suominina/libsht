@@ -148,7 +148,7 @@ void lht_remove(lht_t* ht, const char *key)
     entry_t *prev = NULL;
 
     while (entry != NULL) {
-        if (strncmp(entry->key, key, strlen(key)+1) == 0) {
+        if (strncmp(entry->key, key, strlen(key)) == 0) {
             if (prev == NULL) {
                 ht->entries[slot] = entry->next;
             } else {
