@@ -31,7 +31,7 @@ unsigned int ht_hash(const char *key)
     unsigned int key_len = strlen(key);
 
     for (unsigned int i = 0; i < key_len; i++) {
-        value = value * 37 + key[i];
+        value = value * 12345 + key[i];
     }
 
     value = value % TABLE_SIZE;
@@ -74,7 +74,6 @@ lht_t* lht_create()
     return ht;
 }
 
-/* returns the slot if there were no entries */
 int lht_set(lht_t *ht, const char *key, const char *value)
 {
     unsigned int slot = ht_hash(key);
